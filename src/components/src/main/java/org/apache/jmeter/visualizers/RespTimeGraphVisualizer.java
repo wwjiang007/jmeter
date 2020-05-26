@@ -2,18 +2,17 @@
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The ASF licenses this file to you under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.jmeter.visualizers;
@@ -47,12 +46,12 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.jmeter.gui.TestElementMetadata;
 import org.apache.jmeter.gui.action.ActionNames;
 import org.apache.jmeter.gui.action.ActionRouter;
 import org.apache.jmeter.gui.action.SaveGraphics;
@@ -65,20 +64,18 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.visualizers.gui.AbstractVisualizer;
 import org.apache.jmeter.visualizers.utils.Colors;
 import org.apache.jorphan.gui.GuiUtils;
+import org.apache.jorphan.gui.JFactory;
 import org.apache.jorphan.gui.JLabeledTextField;
 import org.apache.jorphan.math.StatCalculatorLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@TestElementMetadata(labelResource = "graph_resp_time_title")
 public class RespTimeGraphVisualizer extends AbstractVisualizer implements ActionListener, Clearable {
 
     private static final long serialVersionUID = 281L;
 
     private static final Logger log = LoggerFactory.getLogger(RespTimeGraphVisualizer.class);
-
-    private static final Font FONT_DEFAULT = UIManager.getDefaults().getFont("TextField.font"); //$NON-NLS-1$
-
-    private static final Font FONT_SMALL = new Font("SansSerif", Font.PLAIN, (int) Math.round(FONT_DEFAULT.getSize() * 0.8)); //$NON-NLS-1$
 
     //+ JMX property names; do not change
 
@@ -517,14 +514,14 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
             try {
                 ActionRouter.getInstance().getAction(
                         ActionNames.SAVE_GRAPHICS,SaveGraphics.class.getName()).doAction(
-                                new ActionEvent(this,event.getID(),ActionNames.SAVE_GRAPHICS));
+                        new ActionEvent(this,event.getID(),ActionNames.SAVE_GRAPHICS));
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
         } else if (eventSource == syncWithName) {
             graphTitle.setText(getName());
         } else if (eventSource == dynamicGraphSize) {
-                enableDynamicGraph(dynamicGraphSize.isSelected());
+            enableDynamicGraph(dynamicGraphSize.isSelected());
         } else if (eventSource == samplerSelection) {
             enableSamplerSelection(samplerSelection.isSelected());
             if (!samplerSelection.isSelected()) {
@@ -749,7 +746,6 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
     private JPanel createGraphSettingsPane() {
         JPanel settingsPane = new JPanel(new BorderLayout());
         settingsPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
                 JMeterUtils.getResString("graph_resp_time_settings_pane"))); // $NON-NLS-1$
 
         JPanel intervalPane = new JPanel();
@@ -758,7 +754,7 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
         intervalPane.add(intervalField);
 
         // Button
-        intervalButton.setFont(FONT_SMALL);
+        JFactory.small(intervalButton);
         intervalButton.addActionListener(this);
         intervalPane.add(intervalButton);
 
@@ -785,14 +781,14 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
         searchPanel.add(Box.createRigidArea(new Dimension(5,0)));
 
         // Button
-        applyFilterBtn.setFont(FONT_SMALL);
+        JFactory.small(applyFilterBtn);
         applyFilterBtn.addActionListener(this);
         searchPanel.add(applyFilterBtn);
 
         // checkboxes
-        caseChkBox.setFont(FONT_SMALL);
+        JFactory.small(caseChkBox);
         searchPanel.add(caseChkBox);
-        regexpChkBox.setFont(FONT_SMALL);
+        JFactory.small(regexpChkBox);
         searchPanel.add(regexpChkBox);
 
         return searchPanel;
@@ -800,7 +796,7 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
 
     private JPanel createGraphTitlePane() {
         JPanel titleNamePane = new JPanel(new BorderLayout());
-        syncWithName.setFont(FONT_SMALL);
+        JFactory.small(syncWithName);
         titleNamePane.add(graphTitle, BorderLayout.CENTER);
         titleNamePane.add(syncWithName, BorderLayout.EAST);
 
@@ -817,7 +813,7 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
         titleFontStyleList.setSelectedIndex(DEFAULT_TITLE_FONT_STYLE);
 
         JPanel titlePane = new JPanel(new BorderLayout());
-        titlePane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+        titlePane.setBorder(BorderFactory.createTitledBorder(
                 JMeterUtils.getResString("aggregate_graph_title_group"))); // $NON-NLS-1$
         titlePane.add(titleNamePane, BorderLayout.NORTH);
         titlePane.add(titleStylePane, BorderLayout.SOUTH);
@@ -828,7 +824,6 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
         JPanel lineStylePane = new JPanel();
         lineStylePane.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         lineStylePane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
                 JMeterUtils.getResString("graph_resp_time_settings_line"))); // $NON-NLS-1$
         lineStylePane.add(GuiUtils.createLabelCombo(JMeterUtils.getResString("graph_resp_time_stroke_width"), //$NON-NLS-1$
                 strokeWidthList));
@@ -843,7 +838,6 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
         JPanel dimensionPane = new JPanel();
         dimensionPane.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         dimensionPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
                 JMeterUtils.getResString("aggregate_graph_dimension"))); // $NON-NLS-1$
 
         dimensionPane.add(dynamicGraphSize);
@@ -866,7 +860,6 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
         JPanel xAxisPane = new JPanel();
         xAxisPane.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         xAxisPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
                 JMeterUtils.getResString("aggregate_graph_xaxis_group"))); // $NON-NLS-1$
         xAxisTimeFormat.setText(DEFAULT_XAXIS_TIME_FORMAT); // $NON-NLS-1$
         xAxisPane.add(xAxisTimeFormat);
@@ -881,7 +874,6 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
         JPanel yAxisPane = new JPanel();
         yAxisPane.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         yAxisPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
                 JMeterUtils.getResString("aggregate_graph_yaxis_group"))); // $NON-NLS-1$
         yAxisPane.add(maxValueYAxisLabel);
         yAxisPane.add(incrScaleYAxis);
@@ -897,7 +889,6 @@ public class RespTimeGraphVisualizer extends AbstractVisualizer implements Actio
         JPanel legendPanel = new JPanel();
         legendPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         legendPanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
                 JMeterUtils.getResString("aggregate_graph_legend"))); // $NON-NLS-1$
 
         legendPanel.add(GuiUtils.createLabelCombo(JMeterUtils.getResString("aggregate_graph_legend_placement"), //$NON-NLS-1$

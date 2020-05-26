@@ -2,18 +2,17 @@
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The ASF licenses this file to you under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.jmeter.testbeans.gui;
@@ -122,6 +121,9 @@ public class TestBeanGUI extends AbstractJMeterGuiComponent implements JMeterGUI
 
     /** Whether the GUI components have been created. */
     private boolean initialized = false;
+
+    /** The list of categories this UI participates in */
+    private List<String> menuCategories;
 
     static {
         List<String> paths = new LinkedList<>();
@@ -299,6 +301,8 @@ public class TestBeanGUI extends AbstractJMeterGuiComponent implements JMeterGUI
     public void configure(TestElement element) {
         if (!initialized){
             init();
+            // It populates GUI_CLASS bean property which is used for icon display
+            setupGuiClassesList();
         }
         clearGui();
         super.configure(element);
@@ -369,7 +373,11 @@ public class TestBeanGUI extends AbstractJMeterGuiComponent implements JMeterGUI
      * @return matches
      */
     private List<String> setupGuiClassesList() {
-        List<String> menuCategories = new ArrayList<>();
+        List<String> menuCategories = this.menuCategories;
+        if (menuCategories != null) {
+            return menuCategories;
+        }
+        menuCategories = new ArrayList<>(1);
         // TODO: there must be a nicer way...
         BeanDescriptor bd = beanInfo.getBeanDescriptor();
         if (Assertion.class.isAssignableFrom(testBeanClass)) {
@@ -404,6 +412,7 @@ public class TestBeanGUI extends AbstractJMeterGuiComponent implements JMeterGUI
             menuCategories.add(MenuFactory.TIMERS);
             bd.setValue(TestElement.GUI_CLASS, AbstractTimerGui.class.getName());
         }
+        this.menuCategories = menuCategories;
         return menuCategories;
     }
 

@@ -2,18 +2,17 @@
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The ASF licenses this file to you under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 import com.github.vlsi.gradle.crlf.CrLfSpec
@@ -25,7 +24,6 @@ import org.gradle.api.internal.TaskOutputsInternal
 plugins {
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.stage-vote-release")
-    signing
 }
 
 var jars = arrayOf(
@@ -72,11 +70,6 @@ dependencies {
     for (p in jars) {
         api(project(p))
         testCompile(project(p, "testClasses"))
-    }
-    runtimeOnly("com.github.bulenkov.darcula:darcula") {
-        because("""
-            It just looks good, however Darcula is not used explicitly,
-             so the dependency is added for distribution only""".trimIndent())
     }
 
     binLicense(project(":src:licenses", "binLicense"))
@@ -130,19 +123,20 @@ val populateLibs by tasks.registering {
         }
         for (dep in deps) {
             val compId = dep.id.componentIdentifier
-            // The path is "relative" to rootDir/lib
-            when (compId) {
-                is ProjectComponentIdentifier ->
-                    (when (compId.projectPath) {
-                        launcherProject -> binLibs
-                        jorphanProject, bshclientProject -> libs
-                        else -> libsExt
-                    }).from(dep.file) {
-                        // Remove version from the file name
-                        rename { dep.name + "." + dep.extension }
-                    }
-
-                else -> libs.from(dep.file)
+            if (compId !is ProjectComponentIdentifier || !compId.build.isCurrentBuild) {
+                // Move all non-JMeter jars to lib folder
+                libs.from(dep.file)
+                continue
+            }
+            // JMeter jars are spread across $root/bin, $root/libs, and $root/libs/ext
+            // for historical reasons
+            when (compId.projectPath) {
+                launcherProject -> binLibs
+                jorphanProject, bshclientProject -> libs
+                else -> libsExt
+            }.from(dep.file) {
+                // Remove version from the file name
+                rename { dep.name + "." + dep.extension }
             }
         }
     }
@@ -277,6 +271,7 @@ val xdocs = "$rootDir/xdocs"
 
 fun CopySpec.docCssAndImages() {
     from(xdocs) {
+        include(".htaccess")
         include("css/**")
         include("images/**")
     }
@@ -502,26 +497,42 @@ releaseArtifacts {
     }
 }
 
-val runGui by tasks.registering() {
+val runGui by tasks.registering(JavaExec::class) {
     group = "Development"
     description = "Builds and starts JMeter GUI"
     dependsOn(createDist)
 
-    doLast {
-        javaexec {
-            workingDir = File(project.rootDir, "bin")
-            main = "org.apache.jmeter.NewDriver"
-            classpath("$rootDir/bin/ApacheJMeter.jar")
-            jvmArgs("-Xss256k")
-            jvmArgs("-XX:MaxMetaspaceSize=256m")
+    workingDir = File(project.rootDir, "bin")
+    main = "org.apache.jmeter.NewDriver"
+    classpath("$rootDir/bin/ApacheJMeter.jar")
+    jvmArgs("-Xss256k")
+    jvmArgs("-XX:MaxMetaspaceSize=256m")
 
-            val osName = System.getProperty("os.name")
-            if (osName.contains(Regex("mac os x|darwin|osx", RegexOption.IGNORE_CASE))) {
-                jvmArgs("-Xdock:name=JMeter")
-                jvmArgs("-Xdock:icon=$rootDir/xdocs/images/jmeter_square.png")
-                jvmArgs("-Dapple.laf.useScreenMenuBar=true")
-                jvmArgs("-Dapple.eawt.quitStrategy=CLOSE_ALL_WINDOWS")
-            }
+    val osName = System.getProperty("os.name")
+    if (osName.contains(Regex("mac os x|darwin|osx", RegexOption.IGNORE_CASE))) {
+        jvmArgs("-Xdock:name=JMeter")
+        jvmArgs("-Xdock:icon=$rootDir/xdocs/images/jmeter_square.png")
+        jvmArgs("-Dapple.laf.useScreenMenuBar=true")
+        jvmArgs("-Dapple.eawt.quitStrategy=CLOSE_ALL_WINDOWS")
+    }
+
+    fun passProperty(name: String, default: String? = null) {
+        val value = System.getProperty(name) ?: default
+        value?.let { systemProperty(name, it) }
+    }
+
+    passProperty("java.awt.headless")
+
+    val props = System.getProperties()
+    @Suppress("UNCHECKED_CAST")
+    for (e in props.propertyNames() as `java.util`.Enumeration<String>) {
+        // Pass -Djmeter.* and -Ddarklaf.* properties to the JMeter process
+        if (e.startsWith("jmeter.") || e.startsWith("darklaf.")) {
+            passProperty(e)
+        }
+        if (e == "darklaf.native") {
+            systemProperty("darklaf.decorations", "true")
+            systemProperty("darklaf.allowNativeCode", "true")
         }
     }
 }

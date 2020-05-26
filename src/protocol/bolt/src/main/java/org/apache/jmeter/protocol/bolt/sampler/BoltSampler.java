@@ -2,18 +2,17 @@
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The ASF licenses this file to you under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.jmeter.protocol.bolt.sampler;
@@ -29,6 +28,7 @@ import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.jmeter.config.ConfigTestElement;
 import org.apache.jmeter.engine.util.ConfigMergabilityIndicator;
+import org.apache.jmeter.gui.TestElementMetadata;
 import org.apache.jmeter.protocol.bolt.config.BoltConnectionElement;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
@@ -46,12 +46,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
+@TestElementMetadata(labelResource = "displayName")
 public class BoltSampler extends AbstractBoltTestElement implements Sampler, TestBean, ConfigMergabilityIndicator {
 
     private static final Set<String> APPLICABLE_CONFIG_CLASSES = new HashSet<>(
             Collections.singletonList("org.apache.jmeter.config.gui.SimpleConfigGui")); // $NON-NLS-1$
 
-    private static final ObjectReader objectMapper = new ObjectMapper().readerFor(new TypeReference<HashMap<String, Object>>() {});
+    // Enables to initialize object mapper on demand
+    private static class Holder {
+        private static final ObjectReader OBJECT_READER = new ObjectMapper().readerFor(new TypeReference<HashMap<String, Object>>() {});
+    }
 
     @Override
     public SampleResult sample(Entry e) {
@@ -117,7 +121,7 @@ public class BoltSampler extends AbstractBoltTestElement implements Sampler, Tes
 
     private Map<String, Object> getParamsAsMap() throws IOException {
         if (getParams() != null && getParams().length() > 0) {
-            return objectMapper.readValue(getParams());
+            return Holder.OBJECT_READER.readValue(getParams());
         } else {
             return Collections.emptyMap();
         }

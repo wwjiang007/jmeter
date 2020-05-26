@@ -2,18 +2,17 @@
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The ASF licenses this file to you under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.jmeter.protocol.http.gui;
@@ -29,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
+import org.apache.jmeter.gui.TestElementMetadata;
 import org.apache.jmeter.protocol.http.util.HTTPArgument;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.property.JMeterProperty;
@@ -42,6 +42,7 @@ import org.apache.jorphan.reflect.Functor;
  * These have names and values, as well as check-boxes to determine whether or not to
  * include the "=" sign in the output and whether or not to encode the output.
  */
+@TestElementMetadata(labelResource = "user_defined_variables")
 public class HTTPArgumentsPanel extends ArgumentsPanel {
 
     private static final long serialVersionUID = 240L;

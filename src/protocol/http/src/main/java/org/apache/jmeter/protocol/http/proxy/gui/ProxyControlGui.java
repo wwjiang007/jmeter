@@ -2,18 +2,17 @@
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The ASF licenses this file to you under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.jmeter.protocol.http.proxy.gui;
@@ -69,6 +68,7 @@ import org.apache.jmeter.engine.util.ValueReplacer;
 import org.apache.jmeter.functions.InvalidVariableException;
 import org.apache.jmeter.gui.GuiPackage;
 import org.apache.jmeter.gui.JMeterGUIComponent;
+import org.apache.jmeter.gui.TestElementMetadata;
 import org.apache.jmeter.gui.UnsharedComponent;
 import org.apache.jmeter.gui.action.ActionNames;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
@@ -95,6 +95,10 @@ import org.slf4j.LoggerFactory;
  * GUI of HTTP(s) Test Script Recorder
  *
  */
+@TestElementMetadata(
+        labelResource = "proxy_title",
+        actionGroups = MenuFactory.NON_TEST_ELEMENTS
+)
 public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComponent, ActionListener, ItemListener,
         KeyListener, UnsharedComponent {
     private static final Logger log = LoggerFactory.getLogger(ProxyControlGui.class);
@@ -782,7 +786,7 @@ public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComp
         restart.setEnabled(false);
 
         JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+        panel.setBorder(BorderFactory.createTitledBorder(
                 JMeterUtils.getResString("proxy_general_lifecycle"))); // $NON-NLS-1$
         panel.add(start);
         panel.add(Box.createHorizontalStrut(10));
@@ -838,7 +842,7 @@ public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComp
         gbc.weighty = 1;
 
         JPanel gPane = new JPanel(gridBagLayout);
-        gPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+        gPane.setBorder(BorderFactory.createTitledBorder(
                 JMeterUtils.getResString("proxy_general_settings"))); // $NON-NLS-1$
         gPane.add(panel, gbc.clone());
         gbc.gridx++;
@@ -865,7 +869,7 @@ public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComp
         regexMatch.setActionCommand(ENABLE_RESTART);
 
         VerticalPanel mainPanel = new VerticalPanel();
-        mainPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+        mainPanel.setBorder(BorderFactory.createTitledBorder(
                 JMeterUtils.getResString("proxy_test_plan_content"))); // $NON-NLS-1$
 
         HorizontalPanel nodeCreationPanel = new HorizontalPanel();
@@ -949,7 +953,7 @@ public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComp
         gbc.weightx = 1;
         gbc.weighty = 1;
         JPanel panel = new JPanel(gridBagLayout);
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+        panel.setBorder(BorderFactory.createTitledBorder(
                 JMeterUtils.getResString("proxy_sampler_settings"))); // $NON-NLS-1$
         panel.add(httpSampleNamingMode, gbc.clone());
         gbc.gridx++;
@@ -1074,7 +1078,7 @@ public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComp
         contentTypeExclude.setText(JMeterUtils.getProperty("proxy.content_type_exclude")); // $NON-NLS-1$
 
         HorizontalPanel panel = new HorizontalPanel();
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+        panel.setBorder(BorderFactory.createTitledBorder(
                 JMeterUtils.getResString("proxy_content_type_filter"))); // $NON-NLS-1$
         panel.add(labelInclude);
         panel.add(contentTypeInclude);
@@ -1092,8 +1096,8 @@ public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComp
         includeTable.setPreferredScrollableViewportSize(new Dimension(80, 80));
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), JMeterUtils
-                .getResString("patterns_to_include"))); // $NON-NLS-1$
+        panel.setBorder(BorderFactory.createTitledBorder(
+                JMeterUtils.getResString("patterns_to_include"))); // $NON-NLS-1$
 
         panel.add(GuiUtils.emptyBorder(new JScrollPane(includeTable)), BorderLayout.CENTER);
         panel.add(createTableButtonPanel(ADD_INCLUDE, DELETE_INCLUDE, ADD_TO_INCLUDE_FROM_CLIPBOARD, null), BorderLayout.SOUTH);
@@ -1109,8 +1113,8 @@ public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComp
         excludeTable.setPreferredScrollableViewportSize(new Dimension(80, 80));
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), JMeterUtils
-                .getResString("patterns_to_exclude"))); // $NON-NLS-1$
+        panel.setBorder(BorderFactory.createTitledBorder(
+                JMeterUtils.getResString("patterns_to_exclude"))); // $NON-NLS-1$
 
         panel.add(GuiUtils.emptyBorder(new JScrollPane(excludeTable)), BorderLayout.CENTER);
         panel.add(createTableButtonPanel(ADD_EXCLUDE, DELETE_EXCLUDE, ADD_TO_EXCLUDE_FROM_CLIPBOARD, ADD_SUGGESTED_EXCLUDES), BorderLayout.SOUTH);
@@ -1120,8 +1124,8 @@ public class ProxyControlGui extends LogicControllerGui implements JMeterGUIComp
 
     private JPanel createNotifyListenersPanel() {
         JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), JMeterUtils
-                .getResString("notify_child_listeners_fr"))); // $NON-NLS-1$
+        panel.setBorder(BorderFactory.createTitledBorder(
+                JMeterUtils.getResString("notify_child_listeners_fr"))); // $NON-NLS-1$
 
         notifyChildSamplerListenerOfFilteredSamplersCB = new JCheckBox(JMeterUtils.getResString("notify_child_listeners_fr")); // $NON-NLS-1$
         notifyChildSamplerListenerOfFilteredSamplersCB.setSelected(false);

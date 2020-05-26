@@ -2,25 +2,28 @@
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The ASF licenses this file to you under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.apache.jmeter.gui.action;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.swing.tree.TreeNode;
 
 import org.apache.jmeter.gui.GuiPackage;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
@@ -51,12 +54,15 @@ public class EnableComponent extends AbstractAction {
         if (e.getActionCommand().equals(ActionNames.ENABLE)) {
             log.debug("enabling currently selected gui objects");
             enableComponents(nodes, true);
+            triggerChildrenRender(nodes);
         } else if (e.getActionCommand().equals(ActionNames.DISABLE)) {
             log.debug("disabling currently selected gui objects");
             enableComponents(nodes, false);
+            triggerChildrenRender(nodes);
         } else if (e.getActionCommand().equals(ActionNames.TOGGLE)) {
             log.debug("toggling currently selected gui objects");
             toggleComponents(nodes);
+            triggerChildrenRender(nodes);
         }
     }
 
@@ -74,6 +80,24 @@ public class EnableComponent extends AbstractAction {
             boolean enable = !node.isEnabled();
             node.setEnabled(enable);
             pack.getGui(node.getTestElement()).setEnabled(enable);
+        }
+    }
+
+    private void triggerChildrenRender(JMeterTreeNode[] nodes) {
+        Set<TreeNode> visited = new HashSet<>();
+        ArrayDeque<TreeNode> queue = new ArrayDeque<>(Arrays.asList(nodes));
+        while (!queue.isEmpty()) {
+            final TreeNode next = queue.poll();
+            if (!visited.add(next)) {
+                continue;
+            }
+            if (next instanceof JMeterTreeNode) {
+                // Trigger render
+                ((JMeterTreeNode) next).nameChanged();
+            }
+            for (int i = 0; i < next.getChildCount(); i++) {
+                queue.add(next.getChildAt(i));
+            }
         }
     }
 
