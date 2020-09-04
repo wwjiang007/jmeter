@@ -138,6 +138,7 @@ public class ProxyControl extends GenericController implements NonTestElement {
     private static final String USE_KEEPALIVE = "ProxyControlGui.use_keepalive"; // $NON-NLS-1$
     private static final String SAMPLER_DOWNLOAD_IMAGES = "ProxyControlGui.sampler_download_images"; // $NON-NLS-1$
     private static final String HTTP_SAMPLER_NAMING_MODE = "ProxyControlGui.proxy_http_sampler_naming_mode"; // $NON-NLS-1$
+    private static final String HTTP_SAMPLER_FORMAT = "ProxyControlGui.proxy_http_sampler_format"; // $NON-NLS-1$
     private static final String PREFIX_HTTP_SAMPLER_NAME = "ProxyControlGui.proxy_prefix_http_sampler_name"; // $NON-NLS-1$
     private static final String PROXY_PAUSE_HTTP_SAMPLER = "ProxyControlGui.proxy_pause_http_sampler"; // $NON-NLS-1$
     private static final String DEFAULT_ENCODING_PROPERTY = "ProxyControlGui.default_encoding"; // $NON-NLS-1$
@@ -200,6 +201,9 @@ public class ProxyControl extends GenericController implements NonTestElement {
 
     // If this is defined, it is assumed to be the alias of a user-supplied certificate; overrides dynamic mode
     static final String CERT_ALIAS = JMeterUtils.getProperty("proxy.cert.alias"); // $NON-NLS-1$
+
+    private static final String DEFAULT_SAMPLER_FORMAT = JMeterUtils.getPropDefault("proxy.sampler_format",
+            "#{counter,number,000} - #{path} (#{name})");
 
     public enum KeystoreMode {
         USER_KEYSTORE,   // user-provided keystore
@@ -286,12 +290,13 @@ public class ProxyControl extends GenericController implements NonTestElement {
     // accessed from Swing-Thread, only
     private String oldPrefix = null;
 
+    private transient javax.swing.Timer sampleWorkerTimer;
+
     public ProxyControl() {
         setPort(DEFAULT_PORT);
         setExcludeList(new HashSet<>());
         setIncludeList(new HashSet<>());
         setCaptureHttpHeaders(true); // maintain original behaviour
-        new javax.swing.Timer(200, this::putSamplesIntoModel).start();
     }
 
     /**
@@ -487,6 +492,14 @@ public class ProxyControl extends GenericController implements NonTestElement {
         return getPropertyAsString(CONTENT_TYPE_INCLUDE);
     }
 
+    public void setHttpSampleNameFormat(String text) {
+        setProperty(HTTP_SAMPLER_FORMAT, text, DEFAULT_SAMPLER_FORMAT);
+    }
+
+    public String getHttpSampleNameFormat() {
+        return getPropertyAsString(HTTP_SAMPLER_FORMAT, DEFAULT_SAMPLER_FORMAT);
+    }
+
     /**
      * @return the {@link JMeterTreeModel} used when run in non-GUI mode, or {@code null} when run in GUI mode
      */
@@ -508,6 +521,8 @@ public class ProxyControl extends GenericController implements NonTestElement {
             log.error("Could not initialise key store", e);
             throw e;
         }
+        sampleWorkerTimer = new javax.swing.Timer(200, this::putSamplesIntoModel);
+        sampleWorkerTimer.start();
         notifyTestListenersOfStart();
         try {
             server = new Daemon(getPort(), this);
@@ -737,6 +752,10 @@ public class ProxyControl extends GenericController implements NonTestElement {
             }
             notifyTestListenersOfEnd();
             server = null;
+        }
+        if (sampleWorkerTimer != null) {
+            sampleWorkerTimer.stop();
+            sampleWorkerTimer = null;
         }
     }
 
@@ -1651,8 +1670,7 @@ public class ProxyControl extends GenericController implements NonTestElement {
         private int groupingMode;
         private long recordedAt;
 
-        public SamplerInfo(HTTPSamplerBase sampler, TestElement[] testElements, JMeterTreeNode target, String prefix,
-                int groupingMode) {
+        public SamplerInfo(HTTPSamplerBase sampler, TestElement[] testElements, JMeterTreeNode target, String prefix, int groupingMode) {
             this.sampler = sampler;
             this.testElements = testElements;
             this.target = target;
@@ -1661,4 +1679,5 @@ public class ProxyControl extends GenericController implements NonTestElement {
             this.recordedAt = System.currentTimeMillis();
         }
     }
+
 }
